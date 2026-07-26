@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Belote — Feuille de marque</title>
+<meta name="theme-color" content="#0B3D2E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Belote">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --felt: #0B3D2E;
+    --felt-dark: #082a20;
+    --paper: #F3E9D2;
+    --paper-dim: #e8dcc0;
+    --gold: #C9A24B;
+    --wine: #8B2635;
+    --ink: #1F1A14;
+    --ink-soft: #5a4f3f;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html{ height:100%; overflow-x:hidden; }
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top, #124a37 0%, var(--felt) 55%, var(--felt-dark) 100%);
+    min-height:100vh;
+    min-height:100dvh;
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    padding:calc(24px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+    display:flex;
+    justify-content:center;
+    overscroll-behavior-y:contain;
+    overflow-x:hidden;
+    width:100%;
+  }
+  .app{ width:100%; max-width:560px; min-width:0; }
+  .brand{ text-align:center; margin-bottom:28px; }
+  .brand h1{
+    font-family:'Fraunces',serif;
+    font-optical-sizing:auto;
+    font-weight:900;
+    font-size:clamp(2.4rem,8vw,3.2rem);
+    color:var(--paper);
+    letter-spacing:0.01em;
+    margin:0;
+    line-height:0.95;
+  }
+  .brand .suits{ color:var(--gold); font-size:1.1rem; letter-spacing:0.6em; margin-top:8px; opacity:0.85; }
+  .brand p{ color:var(--paper-dim); font-size:0.85rem; margin:10px 0 0; letter-spacing:0.04em; }
+
+  .card{
+    background:var(--paper);
+    border-radius:4px;
+    box-shadow: 0 24px 48px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.05);
+    position:relative;
+    overflow:hidden;
+    width:100%;
+    min-width:0;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;height:6px;
+    background:repeating-linear-gradient(90deg, var(--wine) 0 14px, var(--gold) 14px 28px);
+    opacity:0.9;
+  }
+  .card-inner{ padding:28px 24px 24px; }
+
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block; font-size:0.72rem; text-transform:uppercase;
+    letter-spacing:0.08em; color:var(--ink-soft); font-weight:600; margin-bottom:6px;
+  }
+  input, select{
+    width:100%; min-width:0; padding:13px 12px; border:1.5px solid rgba(31,26,20,0.15);
+    border-radius:3px; font-family:'Inter',sans-serif; font-size:1rem; background:#fff; color:var(--ink);
+    min-height:46px; box-sizing:border-box;
+  }
+  input:focus, select:focus{ outline:none; border-color:var(--wine); }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; min-width:0; }
+
+  button{ font-family:'Inter',sans-serif; cursor:pointer; border:none; touch-action:manipulation; }
+  .btn-primary{
+    width:100%; background:var(--wine); color:var(--paper); font-weight:700;
+    font-size:1rem; letter-spacing:0.03em; padding:15px; border-radius:3px;
+    min-height:50px;
+    margin-top:6px; transition:background 0.15s ease, transform 0.1s ease;
+  }
+  .btn-primary:hover{ background:#a4293f; }
+  .btn-primary:active{ transform:scale(0.99); }
+  .btn-primary:disabled{ background:#c9b9a8; cursor:not-allowed; }
+  .btn-secondary{
+    width:100%; background:#2c5e48; color:var(--paper); font-weight:600;
+    font-size:0.85rem; padding:11px; border-radius:3px; margin-top:8px;
+  }
+  .btn-secondary:hover{ background:#204334; }
+  .btn-ghost{
+    background:transparent; color:var(--ink-soft); font-size:0.8rem;
+    letter-spacing:0.04em; padding:12px 10px; text-decoration:underline; text-underline-offset:3px;
+    min-height:44px;
+  }
+  .btn-ghost:hover{ color:var(--wine); }
+
+  .mode-tiles{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+  .mode-tile{
+    background:#fff; border:2px solid rgba(31,26,20,0.12); border-radius:4px;
+    padding:18px 10px; text-align:center; cursor:pointer; transition:border-color .15s ease, transform .1s ease;
+    touch-action:manipulation; min-height:56px;
+  }
+  .mode-tile:hover{ border-color:var(--gold); }
+  .mode-tile.selected{ border-color:var(--wine); background:#fdf6ea; }
+  .mode-tile .icon{ font-size:1.4rem; margin-bottom:6px; }
+  .mode-tile .name{ font-family:'Fraunces',serif; font-weight:700; font-size:1rem; }
+  .mode-tile .desc{ font-size:0.68rem; color:var(--ink-soft); margin-top:4px; line-height:1.3; }
+
+  .score-sticky{
+    position:sticky;
+    top:0;
+    z-index:20;
+    background:var(--paper);
+  }
+  .teams-head{
+    display:grid; grid-template-columns:44px 1fr 1fr; align-items:end; gap:8px;
+    padding-bottom:10px; border-bottom:2px solid var(--ink); margin-bottom:2px;
+    padding-top:2px;
+  }
+  .teams-head .lead{ font-size:0.68rem; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.08em; }
+  .team-name{ font-family:'Fraunces',serif; font-weight:700; font-size:1.05rem; text-align:right; padding-right:2px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .team-name.a{ color:var(--wine); }
+  .team-name.b{ color:#2c5e48; }
+
+  .totals-strip{ display:grid; grid-template-columns:44px 1fr 1fr; gap:8px; padding:14px 0 16px; border-bottom:1px dashed rgba(31,26,20,0.25); }
+  .totals-strip .cible{ font-size:0.62rem; color:var(--ink-soft); align-self:center; }
+  .total-num{ font-family:'Fraunces',serif; font-weight:900; font-size:2.1rem; text-align:right; line-height:1; color:var(--ink); }
+  .total-num.winning{ color:var(--gold); }
+  .target-note{ text-align:center; font-size:0.68rem; color:var(--ink-soft); padding:6px 0 2px; letter-spacing:0.03em; }
+  .mode-note{ text-align:center; font-size:0.65rem; color:var(--ink-soft); padding:0 0 6px; letter-spacing:0.05em; text-transform:uppercase; }
+
+  .rounds{ margin-top:6px; max-height:300px; overflow-y:auto; }
+  .round-row{
+    display:grid; grid-template-columns:44px 1fr 1fr; gap:8px; align-items:center;
+    padding:9px 0; border-bottom:1px solid rgba(31,26,20,0.08);
+  }
+  .round-row .suit{ font-size:1.1rem; color:var(--ink-soft); text-align:center; }
+  .round-row .pts{ text-align:right; font-variant-numeric:tabular-nums; font-size:0.95rem; color:var(--ink); }
+  .round-row .pts.hi{ font-weight:700; }
+  .round-row .label{
+    grid-column:1 / -1; font-size:0.66rem; color:var(--ink-soft); text-align:center;
+    margin-top:-4px; padding-bottom:6px; font-style:italic;
+  }
+  .empty-state{ text-align:center; color:var(--ink-soft); font-size:0.85rem; padding:22px 10px; font-style:italic; }
+
+  .add-round{ margin-top:16px; padding-top:16px; border-top:2px solid var(--ink); }
+  .add-round .row2{ margin-bottom:10px; }
+  .add-round input{ text-align:right; font-variant-numeric:tabular-nums; font-size:1.05rem; }
+
+  .contract-calc{
+    margin-top:14px; padding:14px 14px 6px; background:rgba(11,61,46,0.05);
+    border:1px dashed rgba(11,61,46,0.3); border-radius:4px;
+  }
+  .contract-calc summary{ cursor:pointer; font-weight:600; font-size:0.82rem; color:var(--felt); list-style:none; }
+  .contract-calc summary::-webkit-details-marker{ display:none; }
+  .contract-calc summary::before{ content:"▸ "; }
+  .contract-calc[open] summary::before{ content:"▾ "; }
+  .contract-calc .body{ margin-top:12px; }
+  .seg{ display:flex; border:1.5px solid rgba(31,26,20,0.15); border-radius:3px; overflow:hidden; }
+  .seg button{
+    flex:1; background:#fff; padding:12px 4px; font-size:0.8rem; color:var(--ink-soft); font-weight:600;
+    min-height:44px;
+  }
+  .seg button.active{ background:var(--felt); color:var(--paper); }
+  .seg button:not(:last-child){ border-right:1.5px solid rgba(31,26,20,0.15); }
+  .calc-result{
+    margin-top:12px; padding:10px 12px; background:#fff; border-radius:3px;
+    font-size:0.82rem; border-left:3px solid var(--gold);
+  }
+  .calc-result .line{ display:flex; justify-content:space-between; padding:2px 0; }
+  .calc-result .line b{ font-variant-numeric:tabular-nums; }
+  .calc-result .verdict{ font-weight:700; margin-top:4px; }
+  .calc-result .verdict.success{ color:#2c5e48; }
+  .calc-result .verdict.fail{ color:var(--wine); }
+
+  .footer-actions{ display:flex; justify-content:space-between; align-items:center; margin-top:18px; padding-top:12px; }
+  .winner-banner{
+    background:var(--gold); color:var(--ink); text-align:center; font-family:'Fraunces',serif;
+    font-weight:700; font-size:1.05rem; padding:12px; margin:-28px -24px 20px; letter-spacing:0.02em;
+  }
+  .err{ color:var(--wine); font-size:0.78rem; margin-top:-8px; margin-bottom:12px; }
+  .hint{ font-size:0.68rem; color:var(--ink-soft); margin-top:-6px; margin-bottom:12px; line-height:1.4; }
+
+  ::-webkit-scrollbar{ width:6px; }
+  ::-webkit-scrollbar-thumb{ background:rgba(31,26,20,0.2); border-radius:3px; }
+  @media (prefers-reduced-motion: reduce){ .btn-primary{ transition:none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="brand">
+    <h1>Belote</h1>
+    <div class="suits">♠ ♥ ♦ ♣</div>
+    <p id="subtitle">FEUILLE DE MARQUE</p>
+  </div>
+  <div class="card">
+    <div class="card-inner" id="root">Chargement…</div>
+  </div>
+</div>
+
+<script>
+const SUITS = ['♠','♥','♦','♣'];
+const STORAGE_KEY = 'partie-active';
+let state = null;
+let loaded = false;
+let calcState = { attacker:'A', contract:80, isCapot:false, mult:1, pointsAtt:82, belote:'none' };
+
+const root = document.getElementById('root');
+
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadState(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    state = (res && res.value) ? JSON.parse(res.value) : null;
+  }catch(e){ state = null; }
+  loaded = true;
+  render();
+}
+
+async function saveState(){
+  try{ await window.storage.set(STORAGE_KEY, JSON.stringify(state), false); }
+  catch(e){ console.error('Erreur de sauvegarde', e); }
+}
+
+async function clearState(){
+  try{ await window.storage.delete(STORAGE_KEY, false); }catch(e){}
+  state = null;
+  render();
+}
+
+function totals(){
+  let a=0, b=0;
+  for(const r of state.rounds){ a += r.a; b += r.b; }
+  return {a,b};
+}
+
+let setupMode = 'classique';
+
+function renderSetup(errorMsg){
+  document.getElementById('subtitle').textContent = 'NOUVELLE PARTIE';
+  root.innerHTML = `
+    <div class="field"><label>Variante</label></div>
+    <div class="mode-tiles">
+      <div class="mode-tile ${setupMode==='classique'?'selected':''}" id="tileClassique">
+        <div class="icon">🂡</div>
+        <div class="name">Classique</div>
+        <div class="desc">Score libre par manche</div>
+      </div>
+      <div class="mode-tile ${setupMode==='coinchee'?'selected':''}" id="tileCoinchee">
+        <div class="icon">♟</div>
+        <div class="name">Coinchée</div>
+        <div class="desc">Contrat, coinche, belote, capot</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Équipe 1</label>
+      <input id="teamA" type="text" placeholder="Nous" maxlength="20" value="Nous">
+    </div>
+    <div class="field">
+      <label>Équipe 2</label>
+      <input id="teamB" type="text" placeholder="Eux" maxlength="20" value="Eux">
+    </div>
+    <div class="field">
+      <label>Score cible (optionnel)</label>
+      <input id="target" type="number" placeholder="${setupMode==='coinchee' ? 'ex. 2000' : 'ex. 1000'}" min="1" inputmode="numeric">
+    </div>
+    ${errorMsg ? `<div class="err">${esc(errorMsg)}</div>` : ''}
+    <button class="btn-primary" id="startBtn">Créer la partie</button>
+  `;
+  document.getElementById('tileClassique').onclick = () => { setupMode='classique'; renderSetup(null); };
+  document.getElementById('tileCoinchee').onclick = () => { setupMode='coinchee'; renderSetup(null); };
+  document.getElementById('startBtn').onclick = () => {
+    const a = document.getElementById('teamA').value.trim() || 'Nous';
+    const b = document.getElementById('teamB').value.trim() || 'Eux';
+    const tRaw = document.getElementById('target').value.trim();
+    const target = tRaw ? parseInt(tRaw, 10) : null;
+    if(tRaw && (isNaN(target) || target <= 0)){
+      renderSetup('Le score cible doit être un nombre positif.');
+      return;
+    }
+    state = { mode: setupMode, teamA: a, teamB: b, target: target || null, rounds: [] };
+    saveState();
+    render();
+  };
+}
+
+function computeContract(c){
+  const contract = c.isCapot ? 250 : c.contract;
+  const pointsAtt = c.pointsAtt;
+  const pointsDef = 162 - pointsAtt;
+  const beloteAtt = c.belote === c.attacker ? 20 : 0;
+  const beloteDef = (c.belote !== 'none' && c.belote !== c.attacker) ? 20 : 0;
+
+  let success;
+  if(c.isCapot){
+    success = pointsAtt === 162;
+  } else {
+    success = (pointsAtt + beloteAtt) >= contract;
+  }
+
+  let scoreAtt, scoreDef;
+  if(success){
+    let base = contract + pointsAtt;
+    if(!c.isCapot && pointsAtt === 162){ base += 90; }
+    base = Math.round(base/10)*10;
+    scoreAtt = base * c.mult + beloteAtt;
+    scoreDef = pointsDef + beloteDef;
+  } else {
+    let base = 162 + contract;
+    base = Math.round(base/10)*10;
+    scoreDef = base * c.mult + beloteDef;
+    scoreAtt = beloteAtt;
+    if(!c.isCapot && pointsAtt === 0){ scoreDef += 90; }
+  }
+  return { success, scoreAtt, scoreDef };
+}
+
+function renderCalcResult(){
+  const res = computeContract(calcState);
+  const attName = calcState.attacker === 'A' ? state.teamA : state.teamB;
+  const defName = calcState.attacker === 'A' ? state.teamB : state.teamA;
+  const el = document.getElementById('calcResultBox');
+  if(!el) return;
+  el.innerHTML = `
+    <div class="line"><span>${esc(attName)} (preneur)</span><b>${res.scoreAtt}</b></div>
+    <div class="line"><span>${esc(defName)} (défense)</span><b>${res.scoreDef}</b></div>
+    <div class="verdict ${res.success?'success':'fail'}">${res.success ? '✓ Contrat réalisé' : '✗ Chute'}</div>
+  `;
+}
+
+function applyCalcToFields(){
+  const res = computeContract(calcState);
+  const scoreA = calcState.attacker === 'A' ? res.scoreAtt : res.scoreDef;
+  const scoreB = calcState.attacker === 'A' ? res.scoreDef : res.scoreAtt;
+  document.getElementById('ptsA').value = scoreA;
+  document.getElementById('ptsB').value = scoreB;
+}
+
+function renderContractCalc(){
+  const contractOptions = [80,90,100,110,120,130,140,150,160,170,180]
+    .map(v => `<option value="${v}" ${calcState.contract===v?'selected':''}>${v}</option>`).join('');
+  return `
+    <details class="contract-calc" id="calcPanel">
+      <summary>Calculette de contrat</summary>
+      <div class="body">
+        <div class="field">
+          <label>Équipe preneuse</label>
+          <div class="seg">
+            <button type="button" id="segAttA" class="${calcState.attacker==='A'?'active':''}">${esc(state.teamA)}</button>
+            <button type="button" id="segAttB" class="${calcState.attacker==='B'?'active':''}">${esc(state.teamB)}</button>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Contrat</label>
+            <select id="calcContract" ${calcState.isCapot?'disabled':''}>${contractOptions}</select>
+          </div>
+          <div class="field">
+            <label>Multiplicateur</label>
+            <div class="seg">
+              <button type="button" id="segM1" class="${calcState.mult===1?'active':''}">×1</button>
+              <button type="button" id="segM2" class="${calcState.mult===2?'active':''}">×2</button>
+              <button type="button" id="segM4" class="${calcState.mult===4?'active':''}">×4</button>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label><input type="checkbox" id="calcCapot" ${calcState.isCapot?'checked':''} style="width:auto;margin-right:6px;">Capot annoncé (250)</label>
+        </div>
+        <div class="field">
+          <label>Points réalisés par le preneur (0 à 162, dix de der inclus)</label>
+          <input type="number" id="calcPoints" min="0" max="162" value="${calcState.pointsAtt}">
+        </div>
+        <div class="field">
+          <label>Belote-Rebelote</label>
+          <select id="calcBelote">
+            <option value="none" ${calcState.belote==='none'?'selected':''}>Aucune</option>
+            <option value="A" ${calcState.belote==='A'?'selected':''}>${esc(state.teamA)}</option>
+            <option value="B" ${calcState.belote==='B'?'selected':''}>${esc(state.teamB)}</option>
+          </select>
+        </div>
+        <div class="calc-result" id="calcResultBox"></div>
+        <button type="button" class="btn-secondary" id="useCalcBtn">Utiliser ce calcul</button>
+        <div class="hint">Le total de 162 points inclut déjà le dix de der (152 points de levées + 10 pour la dernière levée) : entrez le score du preneur dixième compris. Convention courante : succès → contrat + points (arrondi à la dizaine) × multiplicateur ; échec → (162 + contrat) × multiplicateur pour la défense. Belote (+20) et capot non annoncé (+90) ajoutés à part. Ajustez les champs ci-dessus si votre table joue d'autres règles.</div>
+      </div>
+    </details>
+  `;
+}
+
+function wireContractCalc(){
+  const panel = document.getElementById('calcPanel');
+  if(!panel) return;
+
+  document.getElementById('segAttA').onclick = () => { calcState.attacker='A'; renderGame(true); };
+  document.getElementById('segAttB').onclick = () => { calcState.attacker='B'; renderGame(true); };
+  document.getElementById('segM1').onclick = () => { calcState.mult=1; renderGame(true); };
+  document.getElementById('segM2').onclick = () => { calcState.mult=2; renderGame(true); };
+  document.getElementById('segM4').onclick = () => { calcState.mult=4; renderGame(true); };
+
+  document.getElementById('calcContract').onchange = (e) => { calcState.contract = parseInt(e.target.value,10); renderCalcResult(); };
+  document.getElementById('calcCapot').onchange = (e) => { calcState.isCapot = e.target.checked; renderGame(true); };
+  document.getElementById('calcPoints').oninput = (e) => {
+    let v = parseInt(e.target.value,10);
+    if(isNaN(v)) v = 0;
+    v = Math.max(0, Math.min(162, v));
+    calcState.pointsAtt = v;
+    renderCalcResult();
+  };
+  document.getElementById('calcBelote').onchange = (e) => { calcState.belote = e.target.value; renderCalcResult(); };
+  document.getElementById('useCalcBtn').onclick = () => { applyCalcToFields(); panel.open = true; };
+
+  panel.open = true;
+  renderCalcResult();
+}
+
+function renderGame(keepCalcOpen){
+  document.getElementById('subtitle').textContent = 'FEUILLE DE MARQUE';
+  const t = totals();
+  const target = state.target;
+  const aWins = target && t.a >= target;
+  const bWins = target && t.b >= target;
+  const leaderA = t.a > t.b;
+  const leaderB = t.b > t.a;
+  const isCoinchee = state.mode === 'coinchee';
+
+  let roundsHtml = '';
+  if(state.rounds.length === 0){
+    roundsHtml = `<div class="empty-state">Aucune manche pour l'instant.<br>Ajoutez la première ci-dessous.</div>`;
+  } else {
+    roundsHtml = state.rounds.map((r, i) => {
+      const suit = SUITS[i % SUITS.length];
+      const labelHtml = r.label ? `<div class="label">${esc(r.label)}</div>` : '';
+      return `
+        <div class="round-row">
+          <div class="suit">${suit}</div>
+          <div class="pts ${r.a > r.b ? 'hi':''}">${r.a}</div>
+          <div class="pts ${r.b > r.a ? 'hi':''}">${r.b}</div>
+        </div>
+        ${labelHtml}
+      `;
+    }).reverse().join('');
+  }
+
+  const winnerBanner = (aWins || bWins)
+    ? `<div class="winner-banner">🏆 ${esc(aWins ? state.teamA : state.teamB)} remporte la partie !</div>`
+    : '';
+
+  root.innerHTML = `
+    ${winnerBanner}
+    <div class="score-sticky">
+      <div class="teams-head">
+        <div class="lead">#</div>
+        <div class="team-name a" title="${esc(state.teamA)}">${esc(state.teamA)}</div>
+        <div class="team-name b" title="${esc(state.teamB)}">${esc(state.teamB)}</div>
+      </div>
+      <div class="totals-strip">
+        <div class="cible">total</div>
+        <div class="total-num ${leaderA ? 'winning':''}">${t.a}</div>
+        <div class="total-num ${leaderB ? 'winning':''}">${t.b}</div>
+      </div>
+      ${target ? `<div class="target-note">Objectif&nbsp;: ${target} points</div>` : ''}
+      <div class="mode-note">${isCoinchee ? 'Belote coinchée' : 'Belote classique'}</div>
+    </div>
+    <div class="rounds">${roundsHtml}</div>
+
+    <div class="add-round">
+      <div class="row2">
+        <input id="ptsA" type="number" inputmode="numeric" placeholder="${esc(state.teamA)}">
+        <input id="ptsB" type="number" inputmode="numeric" placeholder="${esc(state.teamB)}">
+      </div>
+      ${isCoinchee ? renderContractCalc() : ''}
+      <div id="roundErr" class="err" style="display:none;"></div>
+      <button class="btn-primary" id="addBtn">Ajouter la manche</button>
+    </div>
+
+    <div class="footer-actions">
+      <button class="btn-ghost" id="undoBtn" ${state.rounds.length===0?'disabled':''}>Annuler la dernière manche</button>
+      <button class="btn-ghost" id="newGameBtn">Nouvelle partie</button>
+    </div>
+  `;
+
+  const ptsA = document.getElementById('ptsA');
+  const ptsB = document.getElementById('ptsB');
+
+  document.getElementById('addBtn').onclick = () => {
+    const va = ptsA.value.trim();
+    const vb = ptsB.value.trim();
+    const na = va === '' ? 0 : parseInt(va, 10);
+    const nb = vb === '' ? 0 : parseInt(vb, 10);
+    const errEl = document.getElementById('roundErr');
+    if(isNaN(na) || isNaN(nb) || na < 0 || nb < 0){
+      errEl.textContent = 'Entrez des scores valides (nombres positifs).';
+      errEl.style.display = 'block';
+      return;
+    }
+    if(va === '' && vb === ''){
+      errEl.textContent = 'Entrez au moins un score pour cette manche.';
+      errEl.style.display = 'block';
+      return;
+    }
+    let label;
+    if(isCoinchee){
+      const attName = calcState.attacker === 'A' ? state.teamA : state.teamB;
+      const contractLabel = calcState.isCapot ? 'Capot' : calcState.contract;
+      label = `${attName} — contrat ${contractLabel}${calcState.mult>1 ? ' ×'+calcState.mult : ''}`;
+    }
+    state.rounds.push({a: na, b: nb, label});
+    saveState();
+    render();
+  };
+
+  ptsA.addEventListener('keydown', e => { if(e.key === 'Enter') ptsB.focus(); });
+  ptsB.addEventListener('keydown', e => { if(e.key === 'Enter') document.getElementById('addBtn').click(); });
+
+  document.getElementById('undoBtn').onclick = () => {
+    if(state.rounds.length === 0) return;
+    state.rounds.pop();
+    saveState();
+    render();
+  };
+
+  document.getElementById('newGameBtn').onclick = () => {
+    if(confirm('Terminer cette partie et en commencer une nouvelle ? Les scores actuels seront perdus.')){
+      clearState();
+    }
+  };
+
+  if(isCoinchee){ wireContractCalc(); }
+}
+
+function render(){
+  if(!loaded){ root.innerHTML = 'Chargement…'; return; }
+  if(!state){ renderSetup(null); } else { renderGame(); }
+}
+
+loadState();
+</script>
+</body>
+</html>
